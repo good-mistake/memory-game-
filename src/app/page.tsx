@@ -1,103 +1,447 @@
+"use client";
 import Image from "next/image";
+import React, { useState, useEffect, useRef } from "react";
+import SelectFormat from "./SelectFormat";
+import confetti from "canvas-confetti";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCubes,
+  faBurst,
+  faBreadSlice,
+  faBowlRice,
+  faAppleWhole,
+  faHandcuffs,
+  faHeadphones,
+  faSkull,
+  faRadiation,
+  faPizzaSlice,
+  faPaw,
+  faFingerprint,
+  faPuzzlePiece,
+  faEye,
+  faLeaf,
+  faDice,
+  faCookieBite,
+} from "@fortawesome/free-solid-svg-icons";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { motion, AnimatePresence } from "framer-motion";
+import Anchor from "../../public/assets/anchor.svg";
+import Bug from "../../public/assets/bug.svg";
+import Car from "../../public/assets/car.svg";
+import Flask from "../../public/assets/flask.svg";
+import Futbol from "../../public/assets/futbol.svg";
+import Hand from "../../public/assets/hand-spock.svg";
+import Lira from "../../public/assets/lira-sign.svg";
+import Moon from "../../public/assets/moon.svg";
+import Snowflake from "../../public/assets/snowflake.svg";
+import Sun from "../../public/assets/sun.svg";
+
+const customIcons = [
+  () => <Image src={Anchor} alt="anchor" />,
+  () => <Image src={Bug} alt="bug" />,
+  () => <Image src={Car} alt="car" />,
+  () => <Image src={Flask} alt="anchor" />,
+  () => <Image src={Futbol} alt="bug" />,
+  () => <Image src={Hand} alt="car" />,
+  () => <Image src={Lira} alt="anchor" />,
+  () => <Image src={Moon} alt="bug" />,
+  () => <Image src={Snowflake} alt="car" />,
+  () => <Image src={Sun} alt="anchor" />,
+];
+const icons = [
+  faCubes,
+  faAppleWhole,
+  faHeadphones,
+  faPizzaSlice,
+  faPaw,
+  faPuzzlePiece,
+  faDice,
+  faLeaf,
+  faCookieBite,
+  faEye,
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [theme, setTheme] = useState<"numbers" | "icons">("numbers");
+  const [players, setPlayers] = useState<1 | 2 | 3 | 4>(1);
+  const [currentPlayer, setCurrentPlayer] = useState(0);
+  const [size, setSize] = useState<"4x4" | "6x6">("4x4");
+  const [view, setView] = useState<"mode" | "game">("mode");
+  const [scores, setScores] = useState<number[]>(Array(players).fill(0));
+  const [cards, setCards] = useState<
+    {
+      id: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      value: string | IconDefinition | React.ComponentType<any>;
+      flipped: boolean;
+      matched: boolean;
+    }[]
+  >([]);
+  const [firstCard, setFirstCard] = useState<number | null>(null);
+  const [secondCard, setSecondCard] = useState<number | null>(null);
+  const [lockBoard, setLockBoard] = useState(false);
+  const [moves, setMoves] = useState(0);
+  const [time, setTime] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [width, setWidth] = useState(0);
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const maxScore = Math.max(...scores);
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timerActive) {
+      interval = setInterval(() => setTime((prev) => prev + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+  useEffect(() => {
+    if (view === "game") {
+      initializeGame();
+    }
+  }, [view, theme, size, players]);
+
+  useEffect(() => {
+    if (cards.length > 0 && cards.every((card) => card.matched)) {
+      setTimerActive(false);
+      setGameOver(true);
+      confetti({ spread: 70, origin: { y: 0.6 } });
+    }
+  }, [cards]);
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth;
+      setWidth(newWidth);
+      if (newWidth > 600 && menu) {
+        setMenu(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [menu]);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        menu &&
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node)
+      ) {
+        setMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menu, gameOver]);
+  const initializeGame = () => {
+    const grid = parseInt(size);
+    const detail =
+      theme === "icons"
+        ? [...icons, ...customIcons].slice(0, (grid * grid) / 2)
+        : Array.from({ length: (grid * grid) / 2 }, (_, i) => `${i + 1}`);
+
+    const all = [...detail, ...detail]
+      .map((val, i) => ({ id: i, value: val, flipped: true, matched: false }))
+      .sort(() => Math.random() - 0.5);
+
+    setCards(all);
+    setScores(Array(players).fill(0));
+    setCurrentPlayer(0);
+    setTime(0);
+    setMoves(0);
+    setTimerActive(false);
+
+    setTimeout(() => {
+      setCards((prev) => prev.map((c) => ({ ...c, flipped: false })));
+      setTimerActive(true);
+    }, 1500);
+
+    setFirstCard(null);
+    setSecondCard(null);
+    setLockBoard(false);
+    setGameOver(false);
+  };
+
+  const handleClick = (index: number) => {
+    if (lockBoard || cards[index].flipped || cards[index].matched) return;
+
+    const newCard = [...cards];
+    newCard[index].flipped = true;
+    setCards(newCard);
+
+    if (firstCard === null) {
+      setFirstCard(index);
+    } else if (secondCard === null) {
+      setSecondCard(index);
+      setLockBoard(true);
+      setMoves((prev) => prev + 1);
+    }
+    const first = firstCard;
+    const second = index;
+    if (first !== null && cards[first].value === cards[second].value) {
+      newCard[first].matched = true;
+      newCard[second].matched = true;
+      setCards(newCard);
+      setScores((prev) =>
+        prev.map((score, idx) => (idx === currentPlayer ? score + 1 : score))
+      );
+
+      resetTurn(false);
+    } else if (first !== null) {
+      setTimeout(() => {
+        newCard[first].flipped = false;
+        newCard[second].flipped = false;
+        setCards([...newCard]);
+        resetTurn(true);
+      }, 1000);
+    }
+  };
+
+  const resetTurn = (switchTurn = true) => {
+    setFirstCard(null);
+    setSecondCard(null);
+    setLockBoard(false);
+    if (switchTurn) {
+      setCurrentPlayer((prev) => (prev + 1) % players);
+    }
+  };
+  const restart = () => {
+    initializeGame();
+    setMenu(false);
+  };
+  const goToMenu = () => {
+    setView("mode");
+    setScores(Array(players).fill(0));
+    setTime(0);
+    setMoves(0);
+    setGameOver(false);
+    setCurrentPlayer(0);
+    setMenu(false);
+  };
+  const formatTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    return hours > 0
+      ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+      : `${pad(minutes)}:${pad(seconds)}`;
+  };
+  const winners = scores.reduce<number[]>(
+    (acc, score, i) => (score === maxScore ? [...acc, i] : acc),
+    []
+  );
+  const isTie = winners.length > 1;
+  return (
+    <AnimatePresence>
+      {view === "mode" && (
+        <motion.main key="settings">
+          <SelectFormat
+            setTheme={setTheme}
+            setPlayers={setPlayers}
+            setSize={setSize}
+            setView={setView}
+            size={size}
+            players={players}
+            theme={theme}
+          />{" "}
+        </motion.main>
+      )}
+      {view === "game" && (
+        <motion.main
+          key="game"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <div className="gameContainer">
+            <header>
+              <h4>memory</h4>
+              {width < 600 ? (
+                <div className="menu" onClick={() => setMenu(true)}>
+                  Menu
+                </div>
+              ) : (
+                <div className="btns">
+                  <button onClick={restart} className="restart">
+                    Restart
+                  </button>
+                  <button onClick={goToMenu} className="new">
+                    New Game
+                  </button>
+                </div>
+              )}
+            </header>
+
+            <div
+              className={`cards grid`}
+              style={{
+                gridTemplateColumns: `repeat(${parseInt(
+                  size
+                )}, minmax(16px, 1fr))`,
+              }}
+            >
+              {cards.map((card, index) => (
+                <button
+                  key={card.id}
+                  onClick={() => handleClick(index)}
+                  className={`card ${
+                    card.flipped || card.matched ? "flipped" : ""
+                  } ${card.matched ? "matched" : ""}  ${
+                    size === "6x6" ? "cardLarge" : "cardSmall"
+                  }`}
+                >
+                  <div className="inner">
+                    <div className="front"></div>
+                    <div className="back">
+                      {typeof card.value === "object" &&
+                      "iconName" in card.value ? (
+                        <FontAwesomeIcon icon={card.value} />
+                      ) : typeof card.value === "function" ? (
+                        React.createElement(card.value)
+                      ) : (
+                        card.value
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {players === 1 ? (
+              <div className="timerAndMove">
+                <div className="timer">
+                  <p>Time</p>
+                  <h5>{formatTime(time)}</h5>{" "}
+                </div>
+                <div className="move">
+                  <p>Moves</p>
+                  <h5>{moves}</h5>
+                </div>
+              </div>
+            ) : (
+              <div className="timerAndMove playerMoves">
+                {scores.map((score, i) => (
+                  <div
+                    key={i}
+                    className={`move ${
+                      i === currentPlayer ? "active" : ""
+                    } playerMove`}
+                  >
+                    <p>
+                      {width < 600 ? "P" : "Player"} <span>{i + 1}</span>
+                    </p>
+                    <h5>{score}</h5>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.main>
+      )}
+      {gameOver && (
+        <motion.div
+          className="overlay"
+          key="gameOver"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.2 }}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          {players === 1 ? (
+            <div className="overlayContent">
+              <div className="overlayHeader">
+                <h2>You did it!</h2>
+                <p>Game over! Here’s how you got on…</p>
+              </div>
+              <div className="overLayMain">
+                <div className="timerAndMove">
+                  <div className="timer">
+                    <p>Time Elapsed</p>
+                    <h5>{formatTime(time)}</h5>{" "}
+                  </div>
+                  <div className="move">
+                    <p>Moves Taken</p>
+                    <h5>{moves} Moves</h5>
+                  </div>
+                </div>
+              </div>
+              <div className="btns">
+                <button onClick={restart} className="restart">
+                  Restart
+                </button>
+                <button onClick={goToMenu} className="new">
+                  Setup New Game
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="overlayContent">
+              <div className="overlayHeader">
+                <h2>
+                  {isTie ? `It’s a tie!` : `Player ${winners[0] + 1} Wins!`}
+                </h2>
+                <p>Game over! Here are the results…</p>
+              </div>
+              <div className="overLayMain">
+                <div className="timerAndMove">
+                  {scores.map((score, i) => (
+                    <div
+                      key={i}
+                      className={`playerResult ${
+                        winners.includes(i) ? "winner" : ""
+                      }`}
+                    >
+                      <p>
+                        Player {i + 1} {winners.includes(i) && "(Winner!)"}
+                      </p>
+                      <h5>
+                        {score} {score === 1 ? "Pair" : "Pairs"}
+                      </h5>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="btns">
+                {" "}
+                <button onClick={restart} className="restart">
+                  Restart
+                </button>
+                <button onClick={goToMenu} className="Mnew">
+                  Setup New Game
+                </button>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+      {menu && width < 600 && (
+        <motion.div
+          className="overlay"
+          key="menu"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.2 }}
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <div className="overlayBtns" ref={menuRef}>
+            <button onClick={restart} className="restart">
+              Restart
+            </button>
+            <button onClick={goToMenu} className="new">
+              New Game
+            </button>
+            <button onClick={() => setMenu(false)} className="new">
+              Resume Game
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
