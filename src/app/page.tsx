@@ -157,7 +157,7 @@ export default function Home() {
     setTimeout(() => {
       setCards((prev) => prev.map((c) => ({ ...c, flipped: false })));
       setTimerActive(true);
-    }, 1500);
+    }, 1200);
 
     setFirstCard(null);
     setSecondCard(null);
